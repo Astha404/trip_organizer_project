@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('https://www.creativefabrica.com/wp-content/uploads/2020/12/11/Time-to-travel-background-Graphics-7122111-1.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+        }
+
+        .dashboard {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            color: #f9d342;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+        }
+
+        .sidebar ul li:hover {
+            background: #f9d342;
+            color: black;
+        }
+
+        .content {
+            flex: 1;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .trip-card {
+            background: rgba(255, 255, 255, 0.9);
+            color: black;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            margin: 20px auto;
+            max-width: 500px;
+        }
+
+        button {
+            background: #f9d342;
+            color: black;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #ffcc00;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="sidebar">
+            <h2>Travel Dashboard</h2>
+            <ul>
+                <li onclick="showSection('itinerary')">Plan Itinerary</li>
+                <li onclick="showSection('places')">Explore Places</li>
+                <li onclick="showSection('reviews')">View Reviews</li>
+                <li onclick="logout()">Logout</li>
+            </ul>
+        </div>
+        <div class="content">
+            <h1 id="welcome-message">Welcome to Your Travel Dashboard</h1>
+            <div id="section-content" class="trip-card">
+                <p>Select an option from the menu to get started.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function () {
+            let username = localStorage.getItem("userName") || "User";
+            document.getElementById("welcome-message").innerText = "Welcome, " + username + "!";
+        };
+
+        function showSection(section) {
+            let content = document.getElementById("section-content");
+            if (section === "itinerary") {
+                content.innerHTML = `
+                    <h2>Plan Your Itinerary</h2>
+                    <p>Organize your daily plans for your trip.</p>
+                    <button onclick="location.href='itinerary.html'">Start Planning</button>`;
+            } else if (section === "places") {
+                content.innerHTML = `
+                    <h2>Explore Places</h2>
+                    <p>Discover amazing places for your trip.</p>
+                    <button onclick="location.href='searchBar.html'">Explore Now</button>`;
+            } else if (section === "reviews") {
+                content.innerHTML = `
+                    <h2>View Reviews</h2>
+                    <p>See what others say about different destinations.</p>
+                    <button onclick="location.href='review.html'">Read Reviews</button>`;
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>

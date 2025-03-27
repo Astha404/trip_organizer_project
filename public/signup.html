@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup - Trip Organizer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: url('https://www.freevector.com/uploads/vector/preview/12939/FreeVector-Travel-Background.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+        .signup-container {
+            background: rgba(255, 255, 255, 0.2); /* Transparent effect */
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.3); /* Soft shadow */
+            text-align: center;
+            width: 400px;
+            backdrop-filter: blur(10px); /* Blurry glass effect */
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .signup-container h2 {
+            color:black;
+            margin-bottom: 15px;
+        }
+        .input-group {
+            position: relative;
+            margin: 15px 0;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            outline: none;
+            transition: 0.3s;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color:black;
+        }
+        .input-group input::placeholder {
+            color: rgba(8, 8, 8, 0.7);
+        }
+        .input-group input:focus {
+            border-color:black;
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .signup-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            color: black;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .signup-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+            box-shadow: 0px 5px 15px rgba(255, 255, 255, 0.4);
+        }
+        .login-link {
+            margin-top: 15px;
+            display: block;
+            color: black;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .login-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="signup-container">
+        <h2>🚀 Sign Up</h2>
+        <form id="signup-form">
+            <div class="input-group">
+                <input type="text" id="name" placeholder="Full Name" required>
+            </div>
+            <div class="input-group">
+                <input type="email" id="email" placeholder="Email Address" required>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="signup-btn">Create Account</button>
+        </form>
+        <a href="index.html" class="login-link">Already have an account? Log in</a>
+    </div>
+
+    <script>
+        document.getElementById("signup-form").addEventListener("submit", async (e) => {
+        e.preventDefault(); // Prevent page reload
+
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!name || !email || !password) {
+        alert("All fields are required!");
+        return;
+    }
+
+    const userData = { name, email, password };
+
+    try {
+        const response = await fetch("http://localhost:8000/signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(userData),
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+            alert(`Error: ${data.message}`);
+        } else {
+            // Store user data in localStorage
+            localStorage.setItem("userName", data.user.name);
+            localStorage.setItem("userEmail", data.user.email);
+
+
+            alert("Signup successful!");
+            window.location.href = "userBoard.html"; // Redirect to user board
+        }
+    } catch (error) {
+        console.error("Error signing up:", error);
+    }
+});
+
+
+</script>
+
+</body>
+</html>
+

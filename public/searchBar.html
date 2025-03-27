@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Search Bar</title>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('https://source.unsplash.com/1600x900/?travel') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .search-bar-container {
+            position: relative;
+            width: 300px;
+        }
+
+        input[type="search"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ff9800;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .search-results {
+            position: absolute;
+            width: 100%;
+            background: white;
+            border: 1px solid #ccc;
+            border-top: none;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            z-index: 100;
+        }
+
+        .search-results div {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .search-results div:hover {
+            background: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+
+    <form action="" class="search-bar-container">
+        <input type="search" id="search-bar" placeholder="Search destinations, hotels, activities...">
+        <div class="search-results" id="search-results"></div>
+    </form>
+
+    <script>
+        // Example data (Destinations, Hotels, Activities)
+        const searchItems = [
+            "Paris", "London", "New York", "Bali", "Maldives", 
+            "Best Hotels in Dubai", "Budget Stays in Bangkok",
+            "Scuba Diving in Thailand", "Eiffel Tower Tour", "Hot Air Balloon Ride in Cappadocia"
+        ];
+
+        const searchBar = document.getElementById("search-bar");
+        const searchResults = document.getElementById("search-results");
+
+        searchBar.addEventListener("input", function () {
+            let query = this.value.toLowerCase();
+            searchResults.innerHTML = "";
+            
+            if (query === "") {
+                searchResults.style.display = "none";
+                return;
+            }
+            
+            let filteredItems = searchItems.filter(item => item.toLowerCase().includes(query));
+            
+            if (filteredItems.length > 0) {
+                searchResults.style.display = "block";
+                filteredItems.forEach(item => {
+                    let div = document.createElement("div");
+                    div.textContent = item;
+                    div.addEventListener("click", function () {
+                        searchBar.value = item;
+                        searchResults.style.display = "none";
+                    });
+                    searchResults.appendChild(div);
+                });
+            } else {
+                searchResults.style.display = "none";
+            }
+        });
+
+        // Hide results when clicking outside
+        document.addEventListener("click", function (e) {
+            if (!searchBar.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = "none";
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan Your Itinerary</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('https://image.slidesdocs.com/responsive-images/background/nature-fashion-colorful-travel-travel-agency-color-powerpoint-background_c904a89ad6__960_540.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 60px auto;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.75);
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #f9d342;
+            font-size: 2.8em;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        input, button {
+            width: 90%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+        }
+
+        input {
+            background: rgba(255, 255, 255, 0.85);
+            color: #333;
+        }
+
+        button {
+            background-color: #f9d342;
+            color: black;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #ffcc00;
+            transform: scale(1.05);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+            margin-top: 15px;
+        }
+
+        li {
+            background: rgba(255, 255, 255, 0.85);
+            color: #333;
+            padding: 12px;
+            margin: 6px 0;
+            border-radius: 6px;
+            font-size: 18px;
+        }
+
+        .back-button a {
+            display: inline-block;
+            padding: 12px 20px;
+            font-size: 18px;
+            background-color: #e67e22;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+        }
+
+        .back-button a:hover {
+            background-color: #d35400;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Plan Your Itinerary</h1>
+        <p>Organize your trip day by day and explore exciting places.</p>
+        <div class="form-group">
+            <input type="text" id="activity" placeholder="Enter activity (e.g., Visit Eiffel Tower)">
+            <button onclick="addActivity()">Add Activity</button>
+        </div>
+        <ul id="itinerary-list"></ul>
+        <div class="back-button">
+            <a href="userBoard.html">← Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        function addActivity() {
+            var activity = document.getElementById("activity").value;
+            if (activity.trim() !== "") {
+                var listItem = document.createElement("li");
+                listItem.textContent = activity;
+                document.getElementById("itinerary-list").appendChild(listItem);
+                document.getElementById("activity").value = "";
+            }
+        }
+    </script>
+</body>
+</html>

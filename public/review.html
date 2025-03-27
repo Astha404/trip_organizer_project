@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Write a Review</title>
+    <style>
+        /* General reset */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Trebuchet MS', sans-serif;
+            background: url('https://wallpapercave.com/wp/wp4069456.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #333;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 90%;
+            margin: 50px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.2em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        input, textarea, button {
+            font-size: 16px;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            background-color: #3498db;
+            color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .back-button {
+            margin-top: 15px;
+        }
+
+        .back-button a {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #e67e22;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .back-button a:hover {
+            background-color: #d35400;
+            transform: translateY(-3px);
+        }
+
+        textarea {
+            resize: none;
+        }
+
+        .reviews-section {
+            margin-top: 30px;
+        }
+
+        .review-card {
+            background: #f9f9f9;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        .review-card h3 {
+            margin: 0 0 10px;
+            font-size: 1.2em;
+            color: #2c3e50;
+        }
+
+        .review-card p {
+            margin: 5px 0;
+            color: #555;
+        }
+
+        footer {
+            margin-top: 20px;
+            color: #555;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px auto;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            button, .back-button a {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Share Your Travel Experience</h1>
+        <form id="reviewForm">
+            <input type="text" id="name" placeholder="Your Name" required>
+            <input type="email" id="email" placeholder="Your Email" required>
+            <textarea id="review" rows="5" placeholder="Write about your journey..." required></textarea>
+            <button type="submit">Submit Review</button>
+        </form>
+        <!-- Back Button -->
+        <div class="back-button">
+            <a href="index.html">← Back to Our Website</a>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="reviews-section" id="reviewsSection">
+            <h2>Latest Reviews</h2>
+        </div>
+    </div>
+    
+  <script>
+    document.getElementById("reviewForm").addEventListener("submit", async function(event) {
+    event.preventDefault(); // Prevent page reload
+
+    // Get input values
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const description = document.getElementById("review").value.trim();
+
+    if (!name || !email || !description) {
+        alert("❌ All fields are required!");
+        return;
+    }
+
+    // Prepare data
+    const reviewData = { name, email, description };
+
+    try {
+        // Send review to backend
+        const response = await fetch("http://localhost:8000/reviews", { // ✅ Updated URL
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(reviewData),
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            alert("✅ Review submitted successfully!");
+
+            // Add review to UI
+            const reviewCard = document.createElement("div");
+            reviewCard.classList.add("review-card");
+            reviewCard.innerHTML = `
+                <h3>${name}</h3>
+                <p><strong>Email:</strong> ${email}</p>
+                <p>${description}</p>
+            `;
+            document.getElementById("reviewsSection").appendChild(reviewCard);
+
+            // Clear form fields
+            document.getElementById("reviewForm").reset();
+        } else {
+            alert("❌ Failed to submit review.");
+        }
+    } catch (error) {
+        console.error("❌ Error:", error);
+        alert("❌ An error occurred while submitting your review.");
+    }
+});
+
+// Function to load existing reviews
+async function loadReviews() {
+    try {
+        const response = await fetch("http://localhost:8000/reviews");
+        const reviews = await response.json();
+
+        const reviewsSection = document.getElementById("reviewsSection");
+        reviewsSection.innerHTML = "<h2>Latest Reviews</h2>"; // Reset before loading
+
+        reviews.forEach(review => {
+            const reviewCard = document.createElement("div");
+            reviewCard.classList.add("review-card");
+            reviewCard.innerHTML = `
+                <h3>${review.name}</h3>
+                <p><strong>Email:</strong> ${review.email}</p>
+                <p>${review.description}</p>
+            `;
+            reviewsSection.appendChild(reviewCard);
+        });
+    } catch (error) {
+        console.error("Error loading reviews:", error);
+    }
+}
+
+window.onload = loadReviews; // Ensure it loads when page refreshes
+
+
+
+  </script>
