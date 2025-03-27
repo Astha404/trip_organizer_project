@@ -4,7 +4,6 @@ const path = require("path");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
-const bcrypt = require("bcryptjs");
 
 const Booking = require("../models/booking");
 const Review = require("../models/review");
@@ -43,70 +42,63 @@ app.post("/signup", async (req, res) => {
       return res.status(400).json({ success: false, message: "Email already registered!" });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ name, email, password: hashedPassword });
+    // ❌ Remove hashing (Ensure this is not used)
+    // const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // Save plain password
+    const newUser = new User({ name, email, password });
 
     // Save user to DB
     await newUser.save();
 
-   // 🔹 Send redirect URL in response
-   res.status(201).json({ 
-    success: true, 
-    message: "User registered successfully!", 
-    user: { name: newUser.name, email: newUser.email }, 
-    redirect: "/userBoard.html"
-});
-
+    res.status(201).json({ 
+      success: true, 
+      message: "User registered successfully!", 
+      user: { name: newUser.name, email: newUser.email }
+    });
 
   } catch (error) {
-    console.error("Signup Error:", error); // Log error in server console
+    console.error("Signup Error:", error);
     res.status(500).json({ success: false, message: "Error signing up", error: error.message });
   }
 });
 
+//🟢 Login  Route
 
-
-
-// 🟢 User Login Route
 app.post("/login", async (req, res) => {
-    try {
+  try {
       const { email, password } = req.body;
-  
-      // Find user in DB
+
+      // Find user by email
       const user = await User.findOne({ email });
-  
-      // Log user details for debugging
-      console.log("User Found in DB:", user);
-  
       if (!user) {
-        return res.status(401).json({ success: false, message: "Invalid credentials" });
+          return res.status(401).json({ success: false, message: "Invalid credentials" });
       }
-  
-      // Check password match
-      const isPasswordMatch = await bcrypt.compare(password, user.password);
-  
-      // Log password comparison result
-      console.log("Password Match:", isPasswordMatch);
-  
-      if (!isPasswordMatch) {
-        return res.status(401).json({ success: false, message: "Invalid credentials" });
+
+      console.log("Entered Password:", password);
+      console.log("Stored Password from DB:", user.password);
+
+      // ❌ Removed bcrypt.compare() - Directly compare passwords
+      if (password !== user.password) {
+          return res.status(401).json({ success: false, message: "Invalid credentials" });
       }
-  
-      // Generate JWT token
+
+      // Generate JWT token (optional)
       const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: "1h" });
-  
+
       res.json({
-        success: true,
-        message: "Login successful",
-        token,
-        user: { name: user.name, email: user.email }
+          success: true,
+          message: "Login successful",
+          token,
+          user: { name: user.name, email: user.email }
       });
-  
-    } catch (error) {
+
+  } catch (error) {
       res.status(500).json({ success: false, message: "Error logging in", error });
-    }
-  });
+  }
+});
+
+
 // 🟢 Forgot Password Route
 app.post("/forgot-password", async (req, res) => {
   try {
