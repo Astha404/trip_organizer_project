@@ -12,9 +12,18 @@ const reviewSchema = new mongoose.Schema({
     description: {
         type: String,
         required: true,
-    }
+    },
+    date: { 
+        type: Date, 
+        default: Date.now,
+
+     }
 });
 
-// Model name should start with uppercase
+
+
 const Review = mongoose.model("Review", reviewSchema);
 module.exports = Review;
+
+
+

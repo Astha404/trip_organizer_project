@@ -99,7 +99,7 @@
                 <input type="text" id="name" placeholder="Full Name" required>
             </div>
             <div class="input-group">
-                <input type="email" id="email" placeholder="Email Address" required>
+                <input type="email" id="email" placeholder="Email Address(abc@gmail.com)" required>
             </div>
             <div class="input-group">
                 <input type="password" id="password" placeholder="Password" required>
@@ -109,9 +109,16 @@
         <a href="index.html" class="login-link">Already have an account? Log in</a>
     </div>
 
-    <script>
-        document.getElementById("signup-form").addEventListener("submit", async (e) => {
-        e.preventDefault(); // Prevent page reload
+<script>
+
+    function isValidEmail(email) {
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    return emailPattern.test(email);
+}
+
+
+document.getElementById("signup-form").addEventListener("submit", async (e) => {
+    e.preventDefault(); // Prevent page reload
 
     const name = document.getElementById("name").value.trim();
     const email = document.getElementById("email").value.trim();
@@ -119,6 +126,12 @@
 
     if (!name || !email || !password) {
         alert("All fields are required!");
+        return;
+    }
+
+    // ✅ **Check Email Validation**
+    if (!isValidEmail(email)) {
+        alert("Please enter a valid email address!");
         return;
     }
 
@@ -136,10 +149,8 @@
         if (!data.success) {
             alert(`Error: ${data.message}`);
         } else {
-            // Store user data in localStorage
             localStorage.setItem("userName", data.user.name);
             localStorage.setItem("userEmail", data.user.email);
-
 
             alert("Signup successful!");
             window.location.href = "userBoard.html"; // Redirect to user board
@@ -148,7 +159,6 @@
         console.error("Error signing up:", error);
     }
 });
-
 
 </script>
 

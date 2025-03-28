@@ -123,9 +123,13 @@
         }
 
         function logout() {
-            localStorage.clear();
+            localStorage.removeItem("user");
+            window.location.reload();
             window.location.href = "index.html";
-        }
+           
+      
+}
+        
     </script>
 </body>
 </html>

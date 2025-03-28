@@ -4,13 +4,18 @@ const path = require("path");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
+const crypto = require("crypto");
+const sendResetEmail = require("../config/mailer");
 
+// Models
+const Itinerary = require("../models/itinerary");
 const Booking = require("../models/booking");
 const Review = require("../models/review");
 const Contact = require("../models/contact");
 const User = require("../models/user");
 
-dotenv.config(); // Load environment variables
+// Load environment variables
+dotenv.config();
 
 const app = express();
 const PORT = 8000;
@@ -31,24 +36,105 @@ app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
-// 🟢 User Signup Route
+// Routes
+const itineraryRoutes = require("../routes/itineraryRoutes");
+app.use("/itinerary", itineraryRoutes);
+
+// 🟢 **Get User Itinerary**
+app.get("/itinerary/:userEmail", async (req, res) => {
+  try {
+      const { userEmail } = req.params;
+      const itinerary = await Itinerary.findOne({ userEmail });
+
+      if (!itinerary) {
+          return res.json({ success: true, itinerary: { places: [] } });
+      }
+
+      res.json({ success: true, itinerary });
+  } catch (error) {
+      res.status(500).json({ success: false, message: "Error fetching itinerary", error });
+  }
+});
+
+// 🟢 **Add Activity**
+app.post("/itinerary/add", async (req, res) => {
+  try {
+      const { userEmail, name } = req.body;
+      let itinerary = await Itinerary.findOne({ userEmail });
+
+      if (!itinerary) {
+          itinerary = new Itinerary({ userEmail, places: [{ name, status: "pending" }] });
+      } else {
+          itinerary.places.push({ name, status: "pending" });
+      }
+
+      await itinerary.save();
+      res.json({ success: true, message: "Activity added!", itinerary });
+  } catch (error) {
+      res.status(500).json({ success: false, message: "Error adding activity", error });
+  }
+});
+
+// 🟢 **Update Activity Status**
+app.post("/itinerary/update-status", async (req, res) => {
+  try {
+      const { activityId, status } = req.body;
+      const validStatuses = ["Pending", "Finish", "Skip"];
+
+      if (!validStatuses.includes(status)) {
+          return res.status(400).json({ success: false, message: "Invalid status!" });
+      }
+
+      const itinerary = await Itinerary.findOneAndUpdate(
+          { "places._id": activityId },
+          { $set: { "places.$.status": status } },
+          { new: true }
+      );
+
+      if (!itinerary) {
+          return res.status(404).json({ success: false, message: "Activity not found" });
+      }
+
+      res.json({ success: true, message: "Status updated!", itinerary });
+  } catch (error) {
+      res.status(500).json({ success: false, message: "Error updating status", error });
+  }
+});
+
+// 🟢 **Delete Activity**
+app.post("/itinerary/delete", async (req, res) => {
+  try {
+      const { activityId } = req.body;
+
+      const itinerary = await Itinerary.findOneAndUpdate(
+          { "places._id": activityId },
+          { $pull: { places: { _id: activityId } } },
+          { new: true }
+      );
+
+      if (!itinerary) {
+          return res.status(404).json({ success: false, message: "Activity not found" });
+      }
+
+      res.json({ success: true, message: "Activity deleted!", itinerary });
+  } catch (error) {
+      res.status(500).json({ success: false, message: "Error deleting activity", error });
+  }
+});
+
+
+
+// 🟢 User Signup Route (Without Hashing)
 app.post("/signup", async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // Check if email already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ success: false, message: "Email already registered!" });
     }
 
-    // ❌ Remove hashing (Ensure this is not used)
-    // const hashedPassword = await bcrypt.hash(password, 10);
-    
-    // Save plain password
     const newUser = new User({ name, email, password });
-
-    // Save user to DB
     await newUser.save();
 
     res.status(201).json({ 
@@ -58,60 +144,54 @@ app.post("/signup", async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Signup Error:", error);
     res.status(500).json({ success: false, message: "Error signing up", error: error.message });
   }
 });
 
-//🟢 Login  Route
-
+// 🟢 User Login Route (Without Hashing)
 app.post("/login", async (req, res) => {
   try {
-      const { email, password } = req.body;
+    const { email, password } = req.body;
 
-      // Find user by email
-      const user = await User.findOne({ email });
-      if (!user) {
-          return res.status(401).json({ success: false, message: "Invalid credentials" });
-      }
+    const user = await User.findOne({ email });
+    if (!user || password !== user.password) {
+      return res.status(401).json({ success: false, message: "Invalid email or password" });
+    }
 
-      console.log("Entered Password:", password);
-      console.log("Stored Password from DB:", user.password);
+    const token = jwt.sign({ userId: user._id, email: user.email }, SECRET_KEY, { expiresIn: "1h" });
 
-      // ❌ Removed bcrypt.compare() - Directly compare passwords
-      if (password !== user.password) {
-          return res.status(401).json({ success: false, message: "Invalid credentials" });
-      }
-
-      // Generate JWT token (optional)
-      const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: "1h" });
-
-      res.json({
-          success: true,
-          message: "Login successful",
-          token,
-          user: { name: user.name, email: user.email }
-      });
+    res.json({
+      success: true,
+      message: "Login successful",
+      token,
+      user: { name: user.name, email: user.email }
+    });
 
   } catch (error) {
-      res.status(500).json({ success: false, message: "Error logging in", error });
+    res.status(500).json({ success: false, message: "Error logging in", error: error.message });
   }
 });
-
 
 // 🟢 Forgot Password Route
 app.post("/forgot-password", async (req, res) => {
   try {
-    const { email, newPassword } = req.body;
+    const { email } = req.body;
     const user = await User.findOne({ email });
+
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
-    user.password = await bcrypt.hash(newPassword, 10);
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    user.resetToken = resetToken;
+    user.resetTokenExpiry = Date.now() + 3600000; // Token valid for 1 hour
     await user.save();
-    res.json({ success: true, message: "Password updated successfully" });
+
+    await sendResetEmail(email, resetToken);
+    res.json({ success: true, message: "Password reset email sent!" });
+
   } catch (error) {
-    res.status(500).json({ success: false, message: "Error updating password", error });
+    res.status(500).json({ success: false, message: "Error sending reset email", error });
   }
 });
 
@@ -129,7 +209,7 @@ app.post("/book", async (req, res) => {
 // 🟢 Review Routes
 app.get("/reviews", async (req, res) => {
     try {
-        const reviews = await Review.find(); // Fetch all reviews from MongoDB
+        const reviews = await Review.find();
         res.json(reviews);
     } catch (error) {
         res.status(500).json({ message: "Error fetching reviews" });
@@ -138,15 +218,25 @@ app.get("/reviews", async (req, res) => {
 
 // 🟢 POST route for adding a new review
 app.post("/reviews", async (req, res) => {
-    try {
-        const { name, email, description } = req.body; // Extract review details
-        const newReview = new Review({ name, email, description });
-        await newReview.save();
-        res.status(201).json({ success: true, message: "Review submitted successfully!" });
-    } catch (error) {
-        console.error("Error submitting review:", error);
-        res.status(500).json({ success: false, message: "Error submitting review" });
-    }
+  try {
+      const { name, email, description } = req.body;
+
+      if (!name || !email) {
+          return res.status(401).json({ success: false, message: "Unauthorized! Please log in to submit a review." });
+      }
+
+      const newReview = new Review({ 
+          name, 
+          email, 
+          description,
+          date: new Date() 
+      });
+
+      await newReview.save();
+      res.status(201).json({ success: true, message: "Review submitted successfully!" });
+  } catch (error) {
+      res.status(500).json({ success: false, message: "Error submitting review" });
+  }
 });
 
 // Start Server

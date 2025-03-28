@@ -202,52 +202,83 @@ body {
 </div>
 
 <script>
-    async function loginUser(event) {
-    event.preventDefault(); // Prevent form from reloading
+    // ✅ Autofill Login Details When Page Loads
+    function autofillLoginDetails() {
+        const rememberedEmail = localStorage.getItem("rememberedEmail");
+        const rememberedPassword = localStorage.getItem("rememberedPassword");
+        const rememberMeChecked = localStorage.getItem("rememberMe");
 
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
-    const rememberMe = document.getElementById("remember").checked;
+        console.log("Saved Email:", rememberedEmail);
+        console.log("Saved Password:", rememberedPassword);
+        console.log("Remember Me Checked:", rememberMeChecked);
 
-    try {
-        const response = await fetch("http://localhost:8000/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }), // ✅ Ensure correct format
-        });
-
-        const data = await response.json();
-
-        if (!data.success) {
-            alert(data.message);
-            return;
+        if (rememberMeChecked === "true") { 
+            document.getElementById("email").value = rememberedEmail || "";
+            document.getElementById("password").value = rememberedPassword || "";
+            document.getElementById("remember").checked = true;
         }
-
-        // ✅ Store user details and token
-        localStorage.setItem("userName", data.user.name);
-        localStorage.setItem("userEmail", data.user.email);
-        localStorage.setItem("authToken", data.token);
-
-        // ✅ Implement "Remember Me"
-        if (rememberMe) {
-            localStorage.setItem("rememberedEmail", email);
-            localStorage.setItem("rememberedPassword", password);
-        } else {
-            localStorage.removeItem("rememberedEmail");
-            localStorage.removeItem("rememberedPassword");
-        }
-
-        alert("Login successful!");
-        window.location.href = "userBoard.html"; // Redirect to dashboard
-
-    } catch (error) {
-        console.error("Login error:", error);
-        alert("Error logging in. Please try again.");
     }
-}
+
+    // ✅ Call function when the page loads
+    document.addEventListener("DOMContentLoaded", autofillLoginDetails);
+
+    async function loginUser(event) {
+        event.preventDefault();
+
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const rememberMe = document.getElementById("remember").checked;
+
+        console.log("Entered Email:", email);
+        console.log("Entered Password:", password);
+        console.log("Remember Me Checked:", rememberMe);
+
+        try {
+            const response = await fetch("http://localhost:8000/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                alert(data.message);
+                return;
+            }
+
+            localStorage.setItem("userName", data.user.name);
+            localStorage.setItem("userEmail", data.user.email);
+            localStorage.setItem("authToken", data.token);
+            localStorage.setItem("user", JSON.stringify(data.user));
 
 
-    </script>
+            // ✅ Store Remember Me data
+            if (rememberMe) {
+                console.log("Saving Remember Me Data...");
+                localStorage.setItem("rememberedEmail", email);
+                localStorage.setItem("rememberedPassword", password);
+                localStorage.setItem("rememberMe", "true");
+                console.log("Saved Email:", localStorage.getItem("rememberedEmail"));
+                console.log("Saved Password:", localStorage.getItem("rememberedPassword"));
+            } else {
+                console.log("Removing Remember Me Data...");
+                localStorage.removeItem("rememberedEmail");
+                localStorage.removeItem("rememberedPassword");
+                localStorage.removeItem("rememberMe");
+            }
+
+            alert("Login successful!");
+            window.location.href = "userBoard.html";
+
+        } catch (error) {
+            console.error("Login error:", error);
+            alert("Error logging in. Please try again.");
+        }
+    }
+</script>
+
+
     
 <!-- <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initAutocomplete"></script> -->
 
@@ -259,20 +290,13 @@ body {
 
     <div class="content wow fadeInUp"data-wow-duration="4s">
         <h3>Bright your future with <span>travels</span></h3>
-        <p>dicover new places with us, adventure awaits</p>
-        <a href="#" class="btn">discover more</a>
+        <p>discover new places with us, adventure awaits</p>
     </div>
 
-    <div class="controls">
-        <span class="vid-btn active" data-src="images/vid-1.mp4"></span>
-        <span class="vid-btn" data-src="images/vid-2.mp4"></span>
-        <span class="vid-btn" data-src="images/vid-3.mp4"></span>
-        <span class="vid-btn" data-src="images/vid-4.mp4"></span>
-        <span class="vid-btn" data-src="images/vid-5.mp4"></span>
-    </div>
+ 
 
     <div class="video-container">
-        <video src="images/vid-1.mp4" id="video-slider" loop autoplay muted></video>
+        <video src="images/vid-5.mp4" id="video-slider" loop autoplay muted></video>
     </div>
 
 </section>
@@ -669,24 +693,22 @@ body {
 
         <div class="box">
             <h3>about us</h3>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Assumenda quas magni pariatur est accusantium voluptas enim nemo facilis sit debitis.</p>
+            <p>Trip Organizer is your go-to platform for seamless travel planning. Whether you're organizing a solo trip or a group vacation, we provide the tools to make your journey stress-free and enjoyable. Discover new destinations, manage itineraries, and create unforgettable memories with us!</p>
         </div>
         <div class="box">
             <h3>branch locations</h3>
-            <a href="#">india</a>
-            <a href="#">USA</a>
-            <a href="#">japan</a>
-            <a href="#">france</a>
+            <a href="#">India</a>
+            
         </div>
         <div class="box">
             <h3>quick links</h3>
-            <a href="#">home</a>
-            <a href="#">book</a>
-            <a href="#">packages</a>
-            <a href="#">services</a>
-            <a href="#">gallery</a>
-            <a href="#">review</a>
-            <a href="#">contact</a>
+            <a href="#home">home</a>
+            <a href="#book">book</a>
+            <a href="#packages">packages</a>
+            <a href="#services">services</a>
+            <a href="#gallery">gallery</a>
+            <a href="review.html">review</a>
+            <a href="contact.html">contact</a>
         </div>
         <div class="box">
             <h3>follow us</h3>
