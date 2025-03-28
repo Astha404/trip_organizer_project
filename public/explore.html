@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore Places</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            background:url('https://cdn.clippingpath.in/wp-content/uploads/2018/11/adult-blur-camera-368893.jpg');
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        input, select {
+            padding: 10px;
+            margin: 5px;
+            width: 200px;
+        }
+        .places-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .place {
+            background: white;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            width: 250px;
+            cursor: pointer;
+            position: relative;
+        }
+        .add-btn {
+            background: green;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .add-btn:disabled {
+            background: gray;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Explore Places</h1>
+    <div class="search-container">
+        <input type="text" id="search" placeholder="Search places...">
+        <select id="category">
+            <option value="all">All</option>
+            <option value="beach">Beaches</option>
+            <option value="mountain">Mountains</option>
+            <option value="historical">Historical</option>
+        </select>
+    </div>
+    <div class="places-container" id="places-list"></div>
+    <button onclick="window.location.href='itinerary.html'">View Itinerary</button>
+    
+    <script>
+        const places = [
+            { name: "Goa Beach", category: "beach", description: "Beautiful sandy beach in Goa.", image:"https://static.bankbazaar.com/images/india/infographic/goa.webp"},
+            { name: "Manali Hills", category: "mountain", description: "Snow-covered mountains in Manali." },
+            { name: "Taj Mahal", category: "historical", description: "Iconic symbol of love in Agra." },
+            { name: "Kashmir Valley", category: "mountain", description: "Stunning valley in Kashmir." },
+            { name: "Golden Temple", category: "historical", description: "Famous Sikh temple in Amritsar." }
+        ];
+
+        function displayPlaces() {
+            const searchQuery = document.getElementById("search").value.toLowerCase();
+            const selectedCategory = document.getElementById("category").value;
+            const placesList = document.getElementById("places-list");
+            placesList.innerHTML = "";
+
+            places.filter(place => 
+                (selectedCategory === "all" || place.category === selectedCategory) &&
+                place.name.toLowerCase().includes(searchQuery)
+            ).forEach(place => {
+                const div = document.createElement("div");
+                div.classList.add("place");
+                div.innerHTML = `
+                    <h3>${place.name}</h3>
+                    <p>Category: ${place.category}</p>
+                    <button class="add-btn" onclick="addToItinerary('${place.name}', this)">➕ Add to Itinerary</button>
+                `;
+                placesList.appendChild(div);
+            });
+        }
+
+        function addToItinerary(placeName, btn) {
+    let itinerary = JSON.parse(localStorage.getItem("itinerary")) || [];
+    
+    // Check if the place is already added
+    let alreadyExists = itinerary.some(place => place.name === placeName);
+    if (!alreadyExists) {
+        itinerary.push({ name: placeName, status: "Pending" }); // Save as object
+        localStorage.setItem("itinerary", JSON.stringify(itinerary));
+        btn.innerText = "✔️ Added!";
+        btn.disabled = true;
+    }
+}
+
+
+        document.getElementById("search").addEventListener("input", displayPlaces);
+        document.getElementById("category").addEventListener("change", displayPlaces);
+
+        displayPlaces();
+    </script>
+</body>
+</html>

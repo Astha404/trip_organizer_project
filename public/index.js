@@ -7,6 +7,9 @@ const dotenv = require("dotenv");
 const crypto = require("crypto");
 const sendResetEmail = require("../config/mailer");
 
+
+
+
 // Models
 const Itinerary = require("../models/itinerary");
 const Booking = require("../models/booking");
@@ -37,6 +40,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
 // Routes
+const exploreRoutes = require("../routes/exploreRoutes");  
+app.use("/explore", exploreRoutes);
+
 const itineraryRoutes = require("../routes/itineraryRoutes");
 app.use("/itinerary", itineraryRoutes);
 

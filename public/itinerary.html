@@ -27,41 +27,38 @@
         li { background: rgba(255, 255, 255, 0.85); padding: 10px; margin: 5px 0; display: flex; justify-content: space-between; align-items: center; }
         .icons span { cursor: pointer; margin-left: 10px; font-size: 20px; }
         .legend {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 10px;
-    border-radius: 8px;
-    margin: 15px 0;
-}
-.legend p {
-    margin: 5px 0;
-    font-size: 16px;
-}
-.navigation-buttons {
-    display: flex;
-    justify-content: center; /* Center align */
-    margin-top: 20px;
-}
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .legend p {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
 
-.btn {
-    display: inline-block;
-    padding: 12px 20px;
-    font-size: 18px;
-    text-decoration: none;
-    border-radius: 6px;
-    transition: background-color 0.3s;
-}
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            font-size: 18px;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+        }
 
-.back {
-    background-color: #e67e22;
-    color: white;
-}
+        .back {
+            background-color: #e67e22;
+            color: white;
+        }
 
-.back:hover {
-    background-color: #d35400;
-}
-
-
-
+        .back:hover {
+            background-color: #d35400;
+        }
     </style>
 </head>
 <body>
@@ -70,7 +67,6 @@
         <input type="text" id="activity" placeholder="Enter activity" style="color: black;">
         <button onclick="addActivity()">Add Activity</button>
 
-        <!-- 🟢 Symbol Legend -->
         <div class="legend">
             <p><strong>Symbols Guide:</strong></p>
             <p>✔️ - Mark as Finished</p>
@@ -83,90 +79,54 @@
         <div class="navigation-buttons">
             <a href="userBoard.html" class="btn back">🏠 Go to Dashboard</a>
         </div>
-        
-
+    </div>
+    
     <script>
         document.addEventListener("DOMContentLoaded", fetchItinerary);
 
-        const user = JSON.parse(localStorage.getItem("user"));
-        if (!user) {
-            alert("Please log in.");
-            window.location.href = "login.html";
+        function fetchItinerary() {
+            const itineraryList = document.getElementById("itinerary-list");
+            itineraryList.innerHTML = "";
+            let itinerary = JSON.parse(localStorage.getItem("itinerary")) || [];
+            itinerary.forEach((place, index) => addActivityToUI(place, index));
         }
 
-        const userEmail = user.email;
-        const itineraryList = document.getElementById("itinerary-list");
-
-        async function fetchItinerary() {
-            try {
-                const res = await fetch(`http://localhost:8000/itinerary/${userEmail}`);
-                const data = await res.json();
-                itineraryList.innerHTML = "";
-                data.itinerary.places.forEach(place => addActivityToUI(place.name, place.status, place._id));
-            } catch (error) {
-                console.error("Error fetching itinerary:", error);
-            }
-        }
-
-        function addActivityToUI(name, status, id) {
+        function addActivityToUI(place, index) {
             const li = document.createElement("li");
-            li.innerHTML = `${name} (${status}) 
+            li.innerHTML = `${place.name} (${place.status})
                 <span class="icons">
-                    <span onclick="updateStatus('${id}', 'finish')">✔️</span>
-                    <span onclick="updateStatus('${id}', 'skip')">❌</span>
-                    <span onclick="deleteActivity('${id}')">🗑️</span>
+                    <span onclick="updateStatus(${index}, 'Visited')">✔️</span>
+                    <span onclick="updateStatus(${index}, 'Skipped')">❌</span>
+                    <span onclick="deleteActivity(${index})">🗑️</span>
                 </span>`;
-            itineraryList.appendChild(li);
+            document.getElementById("itinerary-list").appendChild(li);
         }
 
-        async function addActivity() {
+        function addActivity() {
             const activityInput = document.getElementById("activity");
             const name = activityInput.value.trim();
-
             if (name) {
-                try {
-                    const res = await fetch("http://localhost:8000/itinerary/add", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ userEmail, name })
-                    });
-
-                    const data = await res.json();
-                    if (data.success) fetchItinerary();
-                } catch (error) {
-                    console.error("Error adding activity:", error);
-                }
+                let itinerary = JSON.parse(localStorage.getItem("itinerary")) || [];
+                itinerary.push({ name, status: "Pending" });
+                localStorage.setItem("itinerary", JSON.stringify(itinerary));
+                fetchItinerary();
             }
             activityInput.value = "";
         }
 
-        async function updateStatus(activityId, status) {
-            try {
-                const res = await fetch("http://localhost:8000/itinerary/update-status", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ activityId, status })
-                });
-
-                const data = await res.json();
-                if (data.success) fetchItinerary();
-            } catch (error) {
-                console.error("Error updating status:", error);
-            }
+        function deleteActivity(index) {
+            let itinerary = JSON.parse(localStorage.getItem("itinerary")) || [];
+            itinerary.splice(index, 1);
+            localStorage.setItem("itinerary", JSON.stringify(itinerary));
+            fetchItinerary();
         }
 
-        async function deleteActivity(activityId) {
-            try {
-                const res = await fetch("http://localhost:8000/itinerary/delete", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ activityId })
-                });
-
-                const data = await res.json();
-                if (data.success) fetchItinerary();
-            } catch (error) {
-                console.error("Error deleting activity:", error);
+        function updateStatus(index, status) {
+            let itinerary = JSON.parse(localStorage.getItem("itinerary")) || [];
+            if (itinerary[index]) {
+                itinerary[index].status = status;
+                localStorage.setItem("itinerary", JSON.stringify(itinerary));
+                fetchItinerary();
             }
         }
     </script>
