@@ -4,21 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Explore Places</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
             text-align: center;
-            background:url('https://cdn.clippingpath.in/wp-content/uploads/2018/11/adult-blur-camera-368893.jpg')no-repeat center center fixed;
-        }
-        .search-container {
-            margin-bottom: 20px;
-        }
-        input, select {
-            padding: 10px;
-            margin: 5px;
-            width: 200px;
+            background: url('https://cdn.clippingpath.in/wp-content/uploads/2018/11/adult-blur-camera-368893.jpg') no-repeat center center fixed;
+            background-size: cover;
         }
         .places-container {
             display: flex;
@@ -35,8 +29,8 @@
             cursor: pointer;
             position: relative;
         }
-        .add-btn {
-            background: green;
+        .open-map-btn {
+            background: blue;
             color: white;
             padding: 5px 10px;
             border: none;
@@ -44,76 +38,127 @@
             cursor: pointer;
             margin-top: 10px;
         }
-        .add-btn:disabled {
-            background: gray;
-            cursor: not-allowed;
+        .map-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            display: none;
         }
+        .map-container {
+            width: 80%;
+            height: 80vh;
+            max-width: 900px;
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        .close-map {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    color: white;
+    border: none;
+    font-size: 24px; 
+    cursor: pointer;
+    z-index: 2000;
+}
+
     </style>
 </head>
 <body>
     <h1>Explore Places</h1>
-    <div class="search-container">
-        <input type="text" id="search" placeholder="Search places...">
-        <select id="category">
-            <option value="all">All</option>
-            <option value="beach">Beaches</option>
-            <option value="mountain">Mountains</option>
-            <option value="historical">Historical</option>
-        </select>
-    </div>
     <div class="places-container" id="places-list"></div>
-    <button onclick="window.location.href='itinerary.html'">View Itinerary</button>
+    <div class="map-overlay" id="mapOverlay">
+        <div class="map-container">
+            <button class="close-map" onclick="closeMap()">❌</button>
+            <div id="map"></div>
+        </div>
+    </div>
     
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
         const places = [
-            { name: "Goa Beach", category: "beach", description: "Beautiful sandy beach in Goa.", image:"https://static.bankbazaar.com/images/india/infographic/goa.webp"},
-            { name: "Manali Hills", category: "mountain", description: "Snow-covered mountains in Manali.", image:"https://static.toiimg.com/photo/72523293.cms" },
-            { name: "Taj Mahal", category: "historical", description: "Iconic symbol of love in Agra.",image:"https://media.tacdn.com/media/attractions-splice-spp-674x446/06/71/c3/53.jpg" },
-            { name: "Kashmir Valley", category: "mountain", description: "Stunning valley in Kashmir.",image:"https://lp-cms-production.imgix.net/2019-06/384e10f39ebc6fab9b991467541ce8ed-dal-lake.jpg" },
-            { name: "Golden Temple", category: "historical", description: "Famous Sikh temple in Amritsar.",image:"https://m.media-amazon.com/images/I/61lieDcGbuS._AC_UF1000,1000_QL80_.jpg" }
+            { name: "Goa Beach", category: "beach", lat: 15.2993, lng: 74.1240, image:"https://static.bankbazaar.com/images/india/infographic/goa.webp", rating: 4.5 },
+            { name: "Manali Hills", category: "mountain", lat: 32.2396, lng: 77.1887, image:"https://static.toiimg.com/photo/72523293.cms", rating: 4.8 },
+            { name: "Taj Mahal", category: "historical", lat: 27.1751, lng: 78.0421, image:"https://media.tacdn.com/media/attractions-splice-spp-674x446/06/71/c3/53.jpg", rating: 4.9 },
+            { name: "Kashmir Valley", category: "mountain", lat: 33.7782, lng: 76.5762, image:"https://lp-cms-production.imgix.net/2019-06/384e10f39ebc6fab9b991467541ce8ed-dal-lake.jpg", rating: 4.7 },
+            { name: "Golden Temple", category: "historical", lat: 31.6200, lng: 74.8765, image:"https://m.media-amazon.com/images/I/61lieDcGbuS._AC_UF1000,1000_QL80_.jpg", rating: 4.6 }
         ];
 
+        let map, marker;
+
+        function initMap() {
+            map = L.map('map').setView([20.5937, 78.9629], 5);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+        }
+
+        function showOnMap(lat, lng, name) {
+            console.log("Opening map for:", name);
+            document.getElementById("mapOverlay").style.display = "flex";
+            
+            setTimeout(() => {
+                map.invalidateSize();
+                map.setView([lat, lng], 10);
+            }, 500); // Fixed delay
+
+            if (marker) {
+                map.removeLayer(marker);
+            }
+
+            marker = L.marker([lat, lng]).addTo(map)
+                .bindPopup(`<b>${name}</b>`)
+                .openPopup();
+        }
+
+        function closeMap() {
+            console.log("Closing map...");
+            document.getElementById("mapOverlay").style.display = "none";
+        }
+
         function displayPlaces() {
-    const searchQuery = document.getElementById("search").value.toLowerCase();
-    const selectedCategory = document.getElementById("category").value;
-    const placesList = document.getElementById("places-list");
-    placesList.innerHTML = "";
+            const placesList = document.getElementById("places-list");
+            placesList.innerHTML = "";
 
-    places.filter(place => 
-        (selectedCategory === "all" || place.category === selectedCategory) &&
-        place.name.toLowerCase().includes(searchQuery)
-    ).forEach(place => {
-        const div = document.createElement("div");
-        div.classList.add("place");
-        div.innerHTML = `
-            <img src="${place.image}" alt="${place.name}" style="width:100%; height:150px; object-fit:cover; border-radius:5px;">
-            <h3>${place.name}</h3>
-            <p>Category: ${place.category}</p>
-            <p>${place.description}</p> 
-            <button class="add-btn" onclick="addToItinerary('${place.name}', this)">➕ Add to Itinerary</button>
-        `;
-        placesList.appendChild(div);
-    });
-}
+            places.forEach(place => {
+                const div = document.createElement("div");
+                div.classList.add("place");
+                div.innerHTML = `
+                    <img src="${place.image}" alt="${place.name}" style="width:100%; height:150px; object-fit:cover; border-radius:5px;">
+                    <h3>${place.name}</h3>
+                    <p>⭐ ${place.rating.toFixed(1)}</p>
+                    <button class="open-map-btn" onclick="showOnMap(${place.lat}, ${place.lng}, '${place.name}')">📍 Open on Map</button>
+                `;
+                placesList.appendChild(div);
+            });
+        }
 
-        function addToItinerary(placeName, btn) {
-    let itinerary = JSON.parse(localStorage.getItem("itinerary")) || [];
-    
-    // Check if the place is already added
-    let alreadyExists = itinerary.some(place => place.name === placeName);
-    if (!alreadyExists) {
-        itinerary.push({ name: placeName, status: "Pending" }); // Save as object
-        localStorage.setItem("itinerary", JSON.stringify(itinerary));
-        btn.innerText = "✔️ Added!";
-        btn.disabled = true;
-    }
-}
+        // Escape key press event to close map
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "Escape") {
+                closeMap();
+            }
+        });
 
-
-        document.getElementById("search").addEventListener("input", displayPlaces);
-        document.getElementById("category").addEventListener("change", displayPlaces);
-
-        displayPlaces();
+        window.onload = function() {
+            initMap();
+            displayPlaces();
+        };
     </script>
 </body>
 </html>
