@@ -13,48 +13,87 @@
             text-align: center;
             background: url('https://cdn.clippingpath.in/wp-content/uploads/2018/11/adult-blur-camera-368893.jpg') no-repeat center center fixed;
             background-size: cover;
-        }
-        .places-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .place {
-            background: white;
-            padding: 15px;
-            margin: 10px;
-            border-radius: 5px;
-            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
-            width: 250px;
-            cursor: pointer;
-            position: relative;
-        }
-        .buttons-container {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-        }
-        .open-map-btn, .add-itinerary-btn, .view-itinerary-btn {
-            flex: 1;
-            margin: 5px;
-            padding: 6px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        .open-map-btn {
-            background: blue;
-            color: white;
-        }
-        .add-itinerary-btn {
-            background: green;
-            color: white;
-        }
-        .view-itinerary-btn {
-            background: orange;
-            color: white;
-        }
+            .places-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.places-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.places-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.place {
+    background: white;
+    padding: 15px;
+    margin: 10px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+    width: 250px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.place img {
+    width: 100%;
+    height: 150px; /* Adjust height as needed */
+    object-fit: cover;
+    border-radius: 5px 5px 0 0;
+}
+.place-info {
+    padding: 10px;
+    text-align: center;
+    color: black;
+    width: 100%;
+}
+
+
+.buttons-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.open-map-btn, .add-itinerary-btn, .view-itinerary-btn {
+    flex: 1;
+    margin: 5px;
+    padding: 6px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.open-map-btn {
+    background: blue;
+    color: white;
+}
+
+.add-itinerary-btn {
+    background: green;
+    color: white;
+}
+
+.view-itinerary-btn {
+    background: orange;
+    color: white;
+}
+
         .map-overlay {
             position: fixed;
             top: 0;
@@ -63,11 +102,10 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(5px);
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            display: none;
         }
         .map-container {
             width: 80%;
@@ -78,10 +116,7 @@
             border-radius: 10px;
             overflow: hidden;
         }
-        #map {
-            height: 100%;
-            width: 100%;
-        }
+        #map { height: 100%; width: 100%; }
         .close-map {
             position: absolute;
             top: 10px;
@@ -94,34 +129,9 @@
             font-size: 16px;
             border-radius: 5px;
         }
-        .home-button {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    font-size: 28px;
-    background: rgba(255, 255, 255, 0.2);
-    padding: 10px 15px;
-    border-radius: 50%;
-    text-decoration: none;
-    transition: background 0.3s;
-}
-
-.home-button a {
-    text-decoration: none;
-    color: #fff;
-}
-
-.home-button:hover {
-    background: rgba(255, 255, 255, 0.5);
-}
-
     </style>
 </head>
 <body>
-    <div class="home-button">
-        <a href="userBoard.html">🏠</a>
-    </div>
-    
     <h1>Explore Places</h1>
     <div class="places-container" id="places-list"></div>
     <div class="map-overlay" id="mapOverlay">
@@ -134,47 +144,67 @@
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
         const places = [
-            { name: "Goa Beach", category: "beach", lat: 15.2993, lng: 74.1240, image:"https://static.bankbazaar.com/images/india/infographic/goa.webp", rating: 4.5 },
-            { name: "Manali Hills", category: "mountain", lat: 32.2396, lng: 77.1887, image:"https://static.toiimg.com/photo/72523293.cms", rating: 4.8 },
-            { name: "Taj Mahal", category: "historical", lat: 27.1751, lng: 78.0421, image:"https://media.tacdn.com/media/attractions-splice-spp-674x446/06/71/c3/53.jpg", rating: 4.9 },
-            { name: "Kashmir Valley", category: "mountain", lat: 33.7782, lng: 76.5762, image:"https://lp-cms-production.imgix.net/2019-06/384e10f39ebc6fab9b991467541ce8ed-dal-lake.jpg", rating: 4.7 },
-            { name: "Golden Temple", category: "historical", lat: 31.6200, lng: 74.8765, image:"https://m.media-amazon.com/images/I/61lieDcGbuS._AC_UF1000,1000_QL80_.jpg", rating: 4.6 }
+            { name: "Goa Beach", lat: 15.2993, lng: 74.1240, description: "Beautiful beach in Goa.", rating: 4.5,image:"https://static.bankbazaar.com/images/india/infographic/goa.webp" },
+            { name: "Manali Hills", lat: 32.2396, lng: 77.1887, description: "Snow-capped hills in Manali.", rating: 4.8,image:"https://static.toiimg.com/photo/72523293.cms" },
+            { name: "Taj Mahal", lat: 27.1751, lng: 78.0421, description: "Historical monument of love.", rating: 4.9 ,image:"https://media.tacdn.com/media/attractions-splice-spp-674x446/06/71/c3/53.jpg"},
+            { name: "Kashmir Valley", lat: 33.7782, lng: 76.5762, description: "Heaven on earth.", rating: 4.7 ,image:"https://lp-cms-production.imgix.net/2019-06/384e10f39ebc6fab9b991467541ce8ed-dal-lake.jpg"},
+            { name: "Golden Temple", lat: 31.6200, lng: 74.8765, description: "Sacred Sikh temple.", rating: 4.6,image:"https://m.media-amazon.com/images/I/61lieDcGbuS._AC_UF1000,1000_QL80_.jpg" }
         ];
+
+        function showOnMap(lat, lng, name) {
+            document.getElementById("mapOverlay").style.display = "flex";
+            const map = L.map('map').setView([lat, lng], 12);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+            
+            places.forEach(place => {
+                L.marker([place.lat, place.lng]).addTo(map)
+                    .bindPopup(`<b>${place.name}</b><br>${place.description}<br>⭐ ${place.rating.toFixed(1)}`);
+            });
+        }
+        
+        function closeMap() {
+            document.getElementById("mapOverlay").style.display = "none";
+        }
 
         function addToItinerary(placeName) {
             let itinerary = JSON.parse(localStorage.getItem("itinerary")) || [];
             itinerary.push({ name: placeName, status: "Pending" });
             localStorage.setItem("itinerary", JSON.stringify(itinerary));
-            alert(`${placeName} added to your itinerary!`);
+            alert(`${placeName} added!`);
         }
-
+        
         function viewItinerary() {
             window.location.href = "itinerary.html";
         }
 
         function displayPlaces() {
-            const placesList = document.getElementById("places-list");
-            placesList.innerHTML = "";
-            places.forEach(place => {
-                const div = document.createElement("div");
-                div.classList.add("place");
-                div.innerHTML = `
-                    <img src="${place.image}" alt="${place.name}" style="width:100%; height:150px; object-fit:cover; border-radius:5px;">
-                    <h3>${place.name}</h3>
-                    <p>⭐ ${place.rating.toFixed(1)}</p>
-                    <div class="buttons-container">
-                        <button class="open-map-btn" onclick="showOnMap(${place.lat}, ${place.lng}, '${place.name}')">📍 Open on Map</button>
-                        <button class="add-itinerary-btn" onclick="addToItinerary('${place.name}')">➕ Add to Itinerary</button>
-                        <button class="view-itinerary-btn" onclick="viewItinerary()">📖 View Itinerary</button>
-                    </div>
-                `;
-                placesList.appendChild(div);
-            });
-        }
+    const placesList = document.getElementById("places-list");
+    placesList.innerHTML = "";
+    places.forEach(place => {
+        const div = document.createElement("div");
+        div.classList.add("place");
 
-        window.onload = function() {
-            displayPlaces();
-        };
+        div.innerHTML = `
+            <img src="${place.image}" alt="${place.name}">
+            <div class="place-info">
+                <h3>${place.name}</h3>
+                <p>${place.description}</p>
+                <p>⭐ ${place.rating.toFixed(1)}</p>
+                <div class="buttons-container">
+                    <button class="open-map-btn" onclick="showOnMap(${place.lat}, ${place.lng}, '${place.name}')">📍 Open Map</button>
+                    <button class="add-itinerary-btn" onclick="addToItinerary('${place.name}')">➕ Add</button>
+                    <button class="view-itinerary-btn" onclick="viewItinerary()">📖 View Itinerary</button>
+                </div>
+            </div>
+        `;
+        placesList.appendChild(div);
+    });
+}
+
+ 
+        window.onload = displayPlaces;
     </script>
 </body>
 </html>
