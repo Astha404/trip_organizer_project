@@ -29,14 +29,31 @@
             cursor: pointer;
             position: relative;
         }
-        .open-map-btn {
-            background: blue;
-            color: white;
-            padding: 5px 10px;
+        .buttons-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .open-map-btn, .add-itinerary-btn, .view-itinerary-btn {
+            flex: 1;
+            margin: 5px;
+            padding: 6px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 10px;
+            font-size: 12px;
+        }
+        .open-map-btn {
+            background: blue;
+            color: white;
+        }
+        .add-itinerary-btn {
+            background: green;
+            color: white;
+        }
+        .view-itinerary-btn {
+            background: orange;
+            color: white;
         }
         .map-overlay {
             position: fixed;
@@ -66,20 +83,45 @@
             width: 100%;
         }
         .close-map {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        .home-button {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background: transparent;
-    color: white;
-    border: none;
-    font-size: 24px; 
-    cursor: pointer;
-    z-index: 2000;
+    top: 20px;
+    left: 20px;
+    font-size: 28px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 10px 15px;
+    border-radius: 50%;
+    text-decoration: none;
+    transition: background 0.3s;
+}
+
+.home-button a {
+    text-decoration: none;
+    color: #fff;
+}
+
+.home-button:hover {
+    background: rgba(255, 255, 255, 0.5);
 }
 
     </style>
 </head>
 <body>
+    <div class="home-button">
+        <a href="userBoard.html">🏠</a>
+    </div>
+    
     <h1>Explore Places</h1>
     <div class="places-container" id="places-list"></div>
     <div class="map-overlay" id="mapOverlay">
@@ -99,42 +141,20 @@
             { name: "Golden Temple", category: "historical", lat: 31.6200, lng: 74.8765, image:"https://m.media-amazon.com/images/I/61lieDcGbuS._AC_UF1000,1000_QL80_.jpg", rating: 4.6 }
         ];
 
-        let map, marker;
-
-        function initMap() {
-            map = L.map('map').setView([20.5937, 78.9629], 5);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
+        function addToItinerary(placeName) {
+            let itinerary = JSON.parse(localStorage.getItem("itinerary")) || [];
+            itinerary.push({ name: placeName, status: "Pending" });
+            localStorage.setItem("itinerary", JSON.stringify(itinerary));
+            alert(`${placeName} added to your itinerary!`);
         }
 
-        function showOnMap(lat, lng, name) {
-            console.log("Opening map for:", name);
-            document.getElementById("mapOverlay").style.display = "flex";
-            
-            setTimeout(() => {
-                map.invalidateSize();
-                map.setView([lat, lng], 10);
-            }, 500); // Fixed delay
-
-            if (marker) {
-                map.removeLayer(marker);
-            }
-
-            marker = L.marker([lat, lng]).addTo(map)
-                .bindPopup(`<b>${name}</b>`)
-                .openPopup();
-        }
-
-        function closeMap() {
-            console.log("Closing map...");
-            document.getElementById("mapOverlay").style.display = "none";
+        function viewItinerary() {
+            window.location.href = "itinerary.html";
         }
 
         function displayPlaces() {
             const placesList = document.getElementById("places-list");
             placesList.innerHTML = "";
-
             places.forEach(place => {
                 const div = document.createElement("div");
                 div.classList.add("place");
@@ -142,21 +162,17 @@
                     <img src="${place.image}" alt="${place.name}" style="width:100%; height:150px; object-fit:cover; border-radius:5px;">
                     <h3>${place.name}</h3>
                     <p>⭐ ${place.rating.toFixed(1)}</p>
-                    <button class="open-map-btn" onclick="showOnMap(${place.lat}, ${place.lng}, '${place.name}')">📍 Open on Map</button>
+                    <div class="buttons-container">
+                        <button class="open-map-btn" onclick="showOnMap(${place.lat}, ${place.lng}, '${place.name}')">📍 Open on Map</button>
+                        <button class="add-itinerary-btn" onclick="addToItinerary('${place.name}')">➕ Add to Itinerary</button>
+                        <button class="view-itinerary-btn" onclick="viewItinerary()">📖 View Itinerary</button>
+                    </div>
                 `;
                 placesList.appendChild(div);
             });
         }
 
-        // Escape key press event to close map
-        document.addEventListener("keydown", function(event) {
-            if (event.key === "Escape") {
-                closeMap();
-            }
-        });
-
         window.onload = function() {
-            initMap();
             displayPlaces();
         };
     </script>
