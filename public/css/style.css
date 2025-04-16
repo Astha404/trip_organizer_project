@@ -19,11 +19,11 @@
   color:#fff;
 }
 .navbar .logo {
-  height: 20%;
-  width: 10%;
+  height: 16%;
+  width: 8%;
   margin: -28px;
-  margin-left: -41px;
-  margin-right: 10px;
+  margin-right: 2px;
+  margin-left: -100px;
   
 }
 .first_carousel .owl-nav .owl-prev span{
@@ -154,6 +154,7 @@ header{
   right:0;
   background: #000;
   z-index: 1000;
+  height: 81px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -189,17 +190,20 @@ header .navbar a:hover{
 
 header .icons i{
   font-size: 2.5rem;
+  display: ruby-text;
+  padding: 10px;
+
   color:#fff;
   cursor: pointer;
   margin-right: 2rem;
-  padding-bottom: 20px;
+  /* padding-bottom: 10px; */
   border-bottom: 1px solid rgba(49, 41, 25, 0);
   transition: all .3s ease-in-out;
 }
 
 header .icons i:hover{
   color:var(--orange);
-  padding-bottom: 10px;
+  /* padding-bottom: 10px; */
   border-bottom: 1px solid orange;
 }
 
