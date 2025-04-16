@@ -226,11 +226,21 @@
         }
     
         function addToItinerary(placeName) {
-            let itinerary = JSON.parse(localStorage.getItem("itinerary")) || [];
-            itinerary.push({ name: placeName, status: "Pending" });
-            localStorage.setItem("itinerary", JSON.stringify(itinerary));
-            alert(`${placeName} added!`);
-        }
+    const userEmail = localStorage.getItem("userEmail");
+    if (!userEmail) {
+        alert("Please log in to add items to your itinerary.");
+        return;
+    }
+
+    const userKey = `itinerary_${userEmail}`;
+    let itinerary = JSON.parse(localStorage.getItem(userKey)) || [];
+
+    itinerary.push({ name: placeName, status: "Pending" });
+    localStorage.setItem(userKey, JSON.stringify(itinerary));
+
+    alert(`${placeName} added to your itinerary!`);
+}
+
     
         function viewItinerary() {
             window.location.href = "itinerary.html";

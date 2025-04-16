@@ -83,14 +83,25 @@
     
     <script>
         document.addEventListener("DOMContentLoaded", fetchItinerary);
-
+    
+        function getUserKey() {
+            const userEmail = localStorage.getItem("userEmail");
+            if (!userEmail) {
+                alert("You must be logged in to view your itinerary.");
+                window.location.href = "login.html";
+                return;
+            }
+            return `itinerary_${userEmail}`;
+        }
+    
         function fetchItinerary() {
             const itineraryList = document.getElementById("itinerary-list");
             itineraryList.innerHTML = "";
-            let itinerary = JSON.parse(localStorage.getItem("itinerary")) || [];
+            const userKey = getUserKey();
+            let itinerary = JSON.parse(localStorage.getItem(userKey)) || [];
             itinerary.forEach((place, index) => addActivityToUI(place, index));
         }
-
+    
         function addActivityToUI(place, index) {
             const li = document.createElement("li");
             li.innerHTML = `${place.name} (${place.status})
@@ -101,34 +112,38 @@
                 </span>`;
             document.getElementById("itinerary-list").appendChild(li);
         }
-
+    
         function addActivity() {
             const activityInput = document.getElementById("activity");
             const name = activityInput.value.trim();
             if (name) {
-                let itinerary = JSON.parse(localStorage.getItem("itinerary")) || [];
+                const userKey = getUserKey();
+                let itinerary = JSON.parse(localStorage.getItem(userKey)) || [];
                 itinerary.push({ name, status: "Pending" });
-                localStorage.setItem("itinerary", JSON.stringify(itinerary));
+                localStorage.setItem(userKey, JSON.stringify(itinerary));
                 fetchItinerary();
             }
             activityInput.value = "";
         }
-
+    
         function deleteActivity(index) {
-            let itinerary = JSON.parse(localStorage.getItem("itinerary")) || [];
+            const userKey = getUserKey();
+            let itinerary = JSON.parse(localStorage.getItem(userKey)) || [];
             itinerary.splice(index, 1);
-            localStorage.setItem("itinerary", JSON.stringify(itinerary));
+            localStorage.setItem(userKey, JSON.stringify(itinerary));
             fetchItinerary();
         }
-
+    
         function updateStatus(index, status) {
-            let itinerary = JSON.parse(localStorage.getItem("itinerary")) || [];
+            const userKey = getUserKey();
+            let itinerary = JSON.parse(localStorage.getItem(userKey)) || [];
             if (itinerary[index]) {
                 itinerary[index].status = status;
-                localStorage.setItem("itinerary", JSON.stringify(itinerary));
+                localStorage.setItem(userKey, JSON.stringify(itinerary));
                 fetchItinerary();
             }
         }
     </script>
+    
 </body>
 </html>

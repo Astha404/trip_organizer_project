@@ -47,87 +47,77 @@ const itineraryRoutes = require("../routes/itineraryRoutes");
 app.use("/itinerary", itineraryRoutes);
 
 // 🟢 **Get User Itinerary**
-app.get("/itinerary/:userEmail", async (req, res) => {
+app.get("/api/itinerary/:userEmail", async (req, res) => {
   try {
-      const { userEmail } = req.params;
-      const itinerary = await Itinerary.findOne({ userEmail });
-
-      if (!itinerary) {
-          return res.json({ success: true, itinerary: { places: [] } });
-      }
-
-      res.json({ success: true, itinerary });
+    const { userEmail } = req.params;
+    const itinerary = await Itinerary.findOne({ userEmail });
+    res.json({ success: true, itinerary: itinerary || { places: [] } });
   } catch (error) {
-      res.status(500).json({ success: false, message: "Error fetching itinerary", error });
+    res.status(500).json({ success: false, message: "Error fetching itinerary", error });
   }
 });
 
 // 🟢 **Add Activity**
-app.post("/itinerary/add", async (req, res) => {
+app.post("/api/itinerary", async (req, res) => {
   try {
-      const { userEmail, name } = req.body;
-      let itinerary = await Itinerary.findOne({ userEmail });
-
-      if (!itinerary) {
-          itinerary = new Itinerary({ userEmail, places: [{ name, status: "pending" }] });
-      } else {
-          itinerary.places.push({ name, status: "pending" });
-      }
-
-      await itinerary.save();
-      res.json({ success: true, message: "Activity added!", itinerary });
+    const { userEmail, name } = req.body;
+    let itinerary = await Itinerary.findOne({ userEmail });
+    if (!itinerary) {
+      itinerary = new Itinerary({ userEmail, places: [{ name, status: "Pending" }] });
+    } else {
+      itinerary.places.push({ name, status: "Pending" });
+    }
+    await itinerary.save();
+    res.json({ success: true, message: "Activity added!", itinerary });
   } catch (error) {
-      res.status(500).json({ success: false, message: "Error adding activity", error });
+    res.status(500).json({ success: false, message: "Error adding activity", error });
   }
 });
 
 // 🟢 **Update Activity Status**
-app.post("/itinerary/update-status", async (req, res) => {
+app.put("/api/itinerary/:activityId", async (req, res) => {
   try {
-      const { activityId, status } = req.body;
-      const validStatuses = ["Pending", "Finish", "Skip"];
+    const { activityId } = req.params;
+    const { status } = req.body;
+    const validStatuses = ["Pending", "Visited", "Skipped"];
 
-      if (!validStatuses.includes(status)) {
-          return res.status(400).json({ success: false, message: "Invalid status!" });
-      }
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, message: "Invalid status!" });
+    }
 
-      const itinerary = await Itinerary.findOneAndUpdate(
-          { "places._id": activityId },
-          { $set: { "places.$.status": status } },
-          { new: true }
-      );
+    const itinerary = await Itinerary.findOneAndUpdate(
+      { "places._id": activityId },
+      { $set: { "places.$.status": status } },
+      { new: true }
+    );
 
-      if (!itinerary) {
-          return res.status(404).json({ success: false, message: "Activity not found" });
-      }
-
-      res.json({ success: true, message: "Status updated!", itinerary });
+    if (!itinerary) {
+      return res.status(404).json({ success: false, message: "Activity not found" });
+    }
+    res.json({ success: true, message: "Status updated!", itinerary });
   } catch (error) {
-      res.status(500).json({ success: false, message: "Error updating status", error });
+    res.status(500).json({ success: false, message: "Error updating status", error });
   }
 });
 
 // 🟢 **Delete Activity**
-app.post("/itinerary/delete", async (req, res) => {
+app.delete("/api/itinerary/:activityId", async (req, res) => {
   try {
-      const { activityId } = req.body;
+    const { activityId } = req.params;
+    const itinerary = await Itinerary.findOneAndUpdate(
+      { "places._id": activityId },
+      { $pull: { places: { _id: activityId } } },
+      { new: true }
+    );
 
-      const itinerary = await Itinerary.findOneAndUpdate(
-          { "places._id": activityId },
-          { $pull: { places: { _id: activityId } } },
-          { new: true }
-      );
-
-      if (!itinerary) {
-          return res.status(404).json({ success: false, message: "Activity not found" });
-      }
-
-      res.json({ success: true, message: "Activity deleted!", itinerary });
+    if (!itinerary) {
+      return res.status(404).json({ success: false, message: "Activity not found" });
+    }
+    res.json({ success: true, message: "Activity deleted!", itinerary });
   } catch (error) {
-      res.status(500).json({ success: false, message: "Error deleting activity", error });
+    res.status(500).json({ success: false, message: "Error deleting activity", error });
   }
 });
-
 
 
 // 🟢 User Signup Route (Without Hashing)
